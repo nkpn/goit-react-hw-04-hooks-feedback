@@ -1,0 +1,9 @@
+.Stat__list {
+  padding: 5px 30px;
+}
+
+.Stat__item {
+  font-size: 16px;
+  line-height: 25px;
+  font-weight: 700;
+}
