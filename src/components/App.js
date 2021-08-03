@@ -1,87 +1,61 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import Controls from './Controls'; //* вместо названия FeedbackOptions
 import Statistics from './Statistics';
 import Section from './Section';
 import Notification from './Notification';
 
-class App extends Component {
-  static defaultProps = {
-    good: 0,
-    neutral: 0,
-    bad: 0,
-    total: 0,
+export default function App() {
+  const [good, setGood] = useState(0);
+  const [neutral, setNeutral] = useState(0);
+  const [bad, setBad] = useState(0);
+
+  const handleChange = event => {
+    const { target } = event;
+    const value = target.textContent.toLowerCase();
+
+    switch (value) {
+      case 'good':
+        setGood(prevState => prevState + 1);
+        break;
+
+      case 'bad':
+        setBad(prevState => prevState + 1);
+        break;
+
+      case 'neutral':
+        setNeutral(prevState => prevState + 1);
+        break;
+
+      default:
+        return;
+    }
   };
 
-  state = {
-    good: this.props.good,
-    neutral: this.props.neutral,
-    bad: this.props.bad,
-    total: this.props.total,
-  };
+  const total = (() => good + neutral + bad)();
+  const countPositiveFeedback = (() => ((good / total) * 100).toFixed())();
 
-  visibleStatistics = false;
+  return (
+    <>
+      <Section title={'Please leave feedback'}>
+        <Controls
+          onLeaveFeedback={handleChange}
+          options={['good', 'neutral', 'bad']}
+        />
+      </Section>
 
-  // goodIncrement = evt => {
-  //   this.setState(prevState => {
-  //     return {
-  //       good: prevState.good + 1,
-  //     };
-  //   });
-  // };
-
-  increment = evt => {
-    this.visibleStatistics = true;
-    this.setState(prevState => {
-      const { target } = evt;
-      const value = target.textContent.toLowerCase();
-      return {
-        [value]: prevState[value] + 1,
-      };
-    });
-  };
-
-  countTotalFeedback = (good, neutral, bad) => {
-    return good + bad + neutral;
-  };
-
-  countPositiveFeedback = (good, neutral, bad) => {
-    const total = good + bad + neutral;
-    return (total === 0 ? 0 : (good / total) * 100).toFixed();
-  };
-
-  render() {
-    const { good, neutral, bad } = this.state;
-    const { increment } = this;
-
-    return (
-      <>
-        <Section title={'Please leave feedback'}>
-          <Controls
-            onLeaveFeedback={increment}
-            options={['good', 'neutral', 'bad']}
+      <Section title={'Statistics'}>
+        {total >= 1 ? (
+          <Statistics
+            good={good}
+            neutral={neutral}
+            bad={bad}
+            total={total}
+            positivePercentage={countPositiveFeedback}
           />
-        </Section>
-
-        <Section title={'Statistics'}>
-          {this.visibleStatistics === true ? (
-            <Statistics
-              good={good}
-              neutral={neutral}
-              bad={bad}
-              total={this.countTotalFeedback(good, neutral, bad)}
-              positivePercentage={this.countPositiveFeedback(
-                good,
-                neutral,
-                bad,
-              )}
-            />
-          ) : (
-            <Notification message="No feedback given" />
-          )}
-        </Section>
-      </>
-    );
-  }
+        ) : (
+          <Notification message="No feedback given" />
+        )}
+      </Section>
+    </>
+  );
 }
-
-export default App;
